@@ -18,5 +18,19 @@
     <ClCompile Include="stub.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mmLoader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="aes.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="aes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mmLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

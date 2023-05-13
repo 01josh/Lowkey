@@ -142,7 +142,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
+      <OptimizeReferences>false</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalLibraryDirectories>.\resolvers</AdditionalLibraryDirectories>
       <TreatLinkerWarningAsErrors>false</TreatLinkerWarningAsErrors>
@@ -158,7 +158,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="aes.c" />
+    <ClCompile Include="mmLoader.c" />
     <ClCompile Include="stub.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="aes.h" />
+    <ClInclude Include="mmLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
