@@ -21,12 +21,18 @@
     <ClCompile Include="aes.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="signature.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Lowkey_stub.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="signature.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

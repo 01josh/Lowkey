@@ -1,10 +1,16 @@
-// Dev : Hamid.Memar
 
+
+// standard libraries
 #include <Windows.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <algorithm>
+
+//classes
+#include "signature.h"
+
+
 
 using namespace std;
 
@@ -37,12 +43,6 @@ inline DWORD _align(DWORD size, DWORD align, DWORD addr = 0)
 {
 	if (!(size % align)) return addr + size;
 	return addr + (size / align + 1) * align;
-}
-inline DWORD _find(uint8_t* data, size_t data_size, DWORD& value)
-{
-	for (size_t i = 0; i < data_size; i++)
-		if (memcmp(&data[i], &value, sizeof DWORD) == 0) return i;
-	return -1;
 }
 
 // App Entrypoint
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
 		input_pe_file_buffer.data(), original_size, 9);
 	data_buffer.resize(compressed_size);
 
-	// Add Padding Before Encryption
+	// Add Padding Before Encryption 
 	for (size_t i = 0; i < 16; i++) data_buffer.insert(data_buffer.begin(), 0x0);
 	for (size_t i = 0; i < 16; i++) data_buffer.push_back(0x0);
 
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
 
 	// Initializing Section [ Code ]
 	IMAGE_SECTION_HEADER	c_sec;
-	memset(&c_sec, NULL, sizeof IMAGE_SECTION_HEADER);
+	memset(&c_sec, NULL, sizeof IMAGE_SECTION_HEADER); //Set values to zero in order to manually edit them later.
 	c_sec.Name[0] = '[';
 	c_sec.Name[1] = 'S';
 	c_sec.Name[2] = 'T';
@@ -281,15 +281,12 @@ int main(int argc, char* argv[])
 	// Add Padding
 	while (pe_writter.tellp() != c_sec.PointerToRawData) pe_writter.put(0x0);
 
-	// Find Singuatures in Lowkey Stub
-	DWORD data_ptr_sig = 0xAABBCCDD;
-	DWORD data_size_sig = 0xEEFFAADD;
-	DWORD actual_data_size_sig = 0xA0B0C0D0;
-	DWORD header_size_sig = 0xF0E0D0A0;
-	DWORD data_ptr_offset = _find(lowkey_stub, sizeof lowkey_stub, data_ptr_sig);
-	DWORD data_size_offset = _find(lowkey_stub, sizeof lowkey_stub, data_size_sig);
-	DWORD actual_data_size_offset = _find(lowkey_stub, sizeof lowkey_stub, actual_data_size_sig);
-	DWORD header_size_offset = _find(lowkey_stub, sizeof lowkey_stub, header_size_sig);
+	Signature Sig(lowkey_stub, sizeof lowkey_stub);
+	vector<DWORD> offsets = Sig.getAlloffs();
+	DWORD data_ptr_offset = offsets[0];
+	DWORD data_size_offset = offsets[1];
+	DWORD actual_data_size_offset = offsets[2];
+	DWORD header_size_offset = offsets[3];
 
 	// Log Singuatures Information
 	if (data_ptr_offset != -1)
