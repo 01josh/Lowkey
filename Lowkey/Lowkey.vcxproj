@@ -136,11 +136,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="aes.c" />
+    <ClCompile Include="header.cpp" />
     <ClCompile Include="Lowkey.cpp" />
     <ClCompile Include="signature.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aes.h" />
+    <ClInclude Include="header.h" />
     <ClInclude Include="Lowkey_stub.h" />
     <ClInclude Include="signature.h" />
   </ItemGroup>

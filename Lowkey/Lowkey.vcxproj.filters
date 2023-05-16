@@ -24,6 +24,9 @@
     <ClCompile Include="signature.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="header.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aes.h">
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="signature.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="header.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
