@@ -27,6 +27,15 @@
     <ClCompile Include="header.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dosheader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ntheader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sectheader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aes.h">
@@ -39,6 +48,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dosheader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ntheader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sectheader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

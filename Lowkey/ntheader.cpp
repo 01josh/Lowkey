@@ -10,6 +10,11 @@ Ntheader::~Ntheader()
 {
 }
 
+IMAGE_NT_HEADERS Ntheader::getNt_h()
+{
+	return nt_h;
+}
+
 void Ntheader::initheadset()
 {
 	nt_h.Signature = IMAGE_NT_SIGNATURE;

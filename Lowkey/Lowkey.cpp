@@ -150,67 +150,8 @@ int main(int argc, char* argv[])
 
 	// Generating PE File, Initializing DOS + NT Headeres
 #pragma region | PE Generation |
+
 	printf("[Information] Generating PE...\n");
-	IMAGE_DOS_HEADER	dos_h;
-	memset(&dos_h, NULL, sizeof IMAGE_DOS_HEADER);
-	dos_h.e_magic = IMAGE_DOS_SIGNATURE;
-	dos_h.e_cblp = 0x0090;
-	dos_h.e_cp = 0x0003;
-	dos_h.e_crlc = 0x0000;
-	dos_h.e_cparhdr = 0x0004;
-	dos_h.e_minalloc = 0x0000;
-	dos_h.e_maxalloc = 0xFFFF;
-	dos_h.e_ss = 0x0000;
-	dos_h.e_sp = 0x00B8;
-	dos_h.e_csum = 0x0000;
-	dos_h.e_ip = 0x0000;
-	dos_h.e_cs = 0x0000;
-	dos_h.e_lfarlc = 0x0040;
-	dos_h.e_ovno = 0x0000;
-	dos_h.e_oemid = 0x0000;
-	dos_h.e_oeminfo = 0x0000;
-	dos_h.e_lfanew = 0x0040;
-
-	IMAGE_NT_HEADERS	nt_h;
-	memset(&nt_h, NULL, sizeof IMAGE_NT_HEADERS);
-	nt_h.Signature = IMAGE_NT_SIGNATURE;
-	nt_h.FileHeader.Machine = IMAGE_FILE_MACHINE_AMD64;
-	nt_h.FileHeader.NumberOfSections = 2;
-	nt_h.FileHeader.TimeDateStamp = 0x00000000;
-	nt_h.FileHeader.PointerToSymbolTable = 0x0;
-	nt_h.FileHeader.NumberOfSymbols = 0x0;
-	nt_h.FileHeader.SizeOfOptionalHeader = 0x00F0;
-	nt_h.FileHeader.Characteristics = 0x0022;
-	nt_h.OptionalHeader.Magic = IMAGE_NT_OPTIONAL_HDR64_MAGIC;
-	nt_h.OptionalHeader.MajorLinkerVersion = 1;
-	nt_h.OptionalHeader.MinorLinkerVersion = 0;
-	nt_h.OptionalHeader.SizeOfCode = 0x00000200;
-	nt_h.OptionalHeader.SizeOfInitializedData = 0x00000200;
-	nt_h.OptionalHeader.SizeOfUninitializedData = 0x0;
-	nt_h.OptionalHeader.AddressOfEntryPoint = 0x00001000;
-	nt_h.OptionalHeader.BaseOfCode = 0x00001000;
-	nt_h.OptionalHeader.ImageBase = 0x0000000140000000;
-	nt_h.OptionalHeader.SectionAlignment = memory_alignment_size;
-	nt_h.OptionalHeader.FileAlignment = file_alignment_size;
-	nt_h.OptionalHeader.MajorOperatingSystemVersion = 0x0;
-	nt_h.OptionalHeader.MinorOperatingSystemVersion = 0x0;
-	nt_h.OptionalHeader.MajorImageVersion = 0x0006;
-	nt_h.OptionalHeader.MinorImageVersion = 0x0000;
-	nt_h.OptionalHeader.MajorSubsystemVersion = 0x0006;
-	nt_h.OptionalHeader.MinorSubsystemVersion = 0x0000;
-	nt_h.OptionalHeader.Win32VersionValue = 0x0;
-	nt_h.OptionalHeader.SizeOfImage = 0x00003000;
-	nt_h.OptionalHeader.SizeOfHeaders = 0x00000200;
-	nt_h.OptionalHeader.CheckSum = 0x0000F3A6;
-	nt_h.OptionalHeader.Subsystem = IMAGE_SUBSYSTEM_WINDOWS_CUI;
-	nt_h.OptionalHeader.DllCharacteristics = 0x0120;
-	nt_h.OptionalHeader.SizeOfStackReserve = 0x0000000000100000;
-	nt_h.OptionalHeader.SizeOfStackCommit = 0x0000000000001000;
-	nt_h.OptionalHeader.SizeOfHeapReserve = 0x0000000000100000;
-	nt_h.OptionalHeader.SizeOfHeapCommit = 0x0000000000001000;
-	nt_h.OptionalHeader.LoaderFlags = 0x00000000;
-	nt_h.OptionalHeader.NumberOfRvaAndSizes = 0x00000010;
-
 	// Initializing Section [ Code ]
 	IMAGE_SECTION_HEADER	c_sec;
 	memset(&c_sec, NULL, sizeof IMAGE_SECTION_HEADER); //Set values to zero in order to manually edit them later.
@@ -248,22 +189,70 @@ int main(int argc, char* argv[])
 	d_sec.Characteristics = IMAGE_SCN_CNT_INITIALIZED_DATA |
 		IMAGE_SCN_MEM_READ |
 		IMAGE_SCN_MEM_WRITE;
+	
+	
+	
+	
+	IMAGE_DOS_HEADER	dos_h;
+	memset(&dos_h, NULL, sizeof IMAGE_DOS_HEADER);
+	dos_h.e_magic = IMAGE_DOS_SIGNATURE;
+	dos_h.e_cblp = 0x0090;
+	dos_h.e_cp = 0x0003;
+	dos_h.e_crlc = 0x0000;
+	dos_h.e_cparhdr = 0x0004;
+	dos_h.e_minalloc = 0x0000;
+	dos_h.e_maxalloc = 0xFFFF;
+	dos_h.e_ss = 0x0000;
+	dos_h.e_sp = 0x00B8;
+	dos_h.e_csum = 0x0000;
+	dos_h.e_ip = 0x0000;
+	dos_h.e_cs = 0x0000;
+	dos_h.e_lfarlc = 0x0040;
+	dos_h.e_ovno = 0x0000;
+	dos_h.e_oemid = 0x0000;
+	dos_h.e_oeminfo = 0x0000;
+	dos_h.e_lfanew = 0x0040;
 
-	// Update PE Image Size
-	printf("[Information] Updating PE Information...\n");
-	nt_h.OptionalHeader.SizeOfImage =
-		_align(d_sec.VirtualAddress + d_sec.Misc.VirtualSize, memory_alignment_size);
-
-	// Update PE Informations
-	nt_h.FileHeader.Characteristics = in_pe_nt_header->FileHeader.Characteristics;
+	IMAGE_NT_HEADERS	nt_h;
+	memset(&nt_h, NULL, sizeof IMAGE_NT_HEADERS);
+	nt_h.Signature = IMAGE_NT_SIGNATURE;
+	nt_h.FileHeader.Machine = IMAGE_FILE_MACHINE_AMD64;
+	nt_h.FileHeader.NumberOfSections = 2;
 	nt_h.FileHeader.TimeDateStamp = in_pe_nt_header->FileHeader.TimeDateStamp;
-	nt_h.OptionalHeader.CheckSum = 0x0000F3A6;
+	nt_h.FileHeader.PointerToSymbolTable = 0x0;
+	nt_h.FileHeader.NumberOfSymbols = 0x0;
+	nt_h.FileHeader.SizeOfOptionalHeader = 0x00F0;
+	nt_h.FileHeader.Characteristics = in_pe_nt_header->FileHeader.Characteristics;
+	nt_h.OptionalHeader.Magic = IMAGE_NT_OPTIONAL_HDR64_MAGIC;
+	nt_h.OptionalHeader.MajorLinkerVersion = 1;
+	nt_h.OptionalHeader.MinorLinkerVersion = 0;
 	nt_h.OptionalHeader.SizeOfCode = c_sec.SizeOfRawData;
 	nt_h.OptionalHeader.SizeOfInitializedData = d_sec.SizeOfRawData;
+	nt_h.OptionalHeader.SizeOfUninitializedData = 0x0;
+	nt_h.OptionalHeader.AddressOfEntryPoint = 0x00005F00;    //needs to updated if stub gets changed
+	nt_h.OptionalHeader.BaseOfCode = 0x00001000;
+	nt_h.OptionalHeader.ImageBase = 0x0000000140000000;
+	nt_h.OptionalHeader.SectionAlignment = memory_alignment_size;
+	nt_h.OptionalHeader.FileAlignment = file_alignment_size;
+	nt_h.OptionalHeader.MajorOperatingSystemVersion = 0x0;
+	nt_h.OptionalHeader.MinorOperatingSystemVersion = 0x0;
+	nt_h.OptionalHeader.MajorImageVersion = 0x0006;
+	nt_h.OptionalHeader.MinorImageVersion = 0x0000;
+	nt_h.OptionalHeader.MajorSubsystemVersion = 0x0006;
+	nt_h.OptionalHeader.MinorSubsystemVersion = 0x0000;
+	nt_h.OptionalHeader.Win32VersionValue = 0x0;
+	nt_h.OptionalHeader.SizeOfImage = _align(d_sec.VirtualAddress + d_sec.Misc.VirtualSize, memory_alignment_size);
+	nt_h.OptionalHeader.SizeOfHeaders = 0x00000200;
+	nt_h.OptionalHeader.CheckSum = 0x0000F3A6;
 	nt_h.OptionalHeader.Subsystem = in_pe_nt_header->OptionalHeader.Subsystem;
+	nt_h.OptionalHeader.DllCharacteristics = 0x0120;
+	nt_h.OptionalHeader.SizeOfStackReserve = 0x0000000000100000;
+	nt_h.OptionalHeader.SizeOfStackCommit = 0x0000000000001000;
+	nt_h.OptionalHeader.SizeOfHeapReserve = 0x0000000000100000;
+	nt_h.OptionalHeader.SizeOfHeapCommit = 0x0000000000001000;
+	nt_h.OptionalHeader.LoaderFlags = 0x00000000;
+	nt_h.OptionalHeader.NumberOfRvaAndSizes = 0x00000010;
 
-	// Update PE Entrypoint ( Taken from .map file )
-	nt_h.OptionalHeader.AddressOfEntryPoint = 0x00005F00;
 
 	// Create/Open PE File
 	printf("[Information] Writing Generated PE to Disk...\n");
