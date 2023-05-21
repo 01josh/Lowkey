@@ -12,7 +12,7 @@
 
 //AES key
 const unsigned char key[32] = {
-	0xD6, 0x23, 0xB8, 0xEF, 0x62, 0x26, 0xCE, 0xC3, 0xE2, 0x4C, 0x55, 0x12,
+	0xD7, 0x24, 0xB8, 0xEF, 0x62, 0x26, 0xCE, 0xC3, 0xE2, 0x4C, 0x55, 0x12,
 	0x7D, 0xE8, 0x73, 0xE7, 0x83, 0x9C, 0x77, 0x6B, 0xB1, 0xA9, 0x3B, 0x57,
 	0xB2, 0x5F, 0xDB, 0xEA, 0x0D, 0xB6, 0x8E, 0xA2
 };
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 {
 	// Setup Console 
 	HANDLE  hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTitleA("Custom x64 PE Packer by H.M v1.0");
+	SetConsoleTitleA("Lowkey Custom x64 PE Packer");
 	FlushConsoleInputBuffer(hConsole);
 	CONSOLE_COLOR_DEFAULT;
 
@@ -149,9 +149,12 @@ int main(int argc, char* argv[])
 	printf("[Information] Compression Ratio : %.2f%%\n", (roundf(ratio * 100.0f) * 0.01f));
 
 	// Generating PE File, Initializing DOS + NT Headeres
+
 #pragma region | PE Generation |
 
 	printf("[Information] Generating PE...\n");
+#pragma region Stub
+
 	// Initializing Section [ Code ]
 	IMAGE_SECTION_HEADER	c_sec;
 	memset(&c_sec, NULL, sizeof IMAGE_SECTION_HEADER); //Set values to zero in order to manually edit them later.
@@ -171,6 +174,9 @@ int main(int argc, char* argv[])
 		IMAGE_SCN_MEM_WRITE |
 		IMAGE_SCN_CNT_CODE;
 
+#pragma endregion
+
+#pragma region Program
 	// Initializing Section [ Data ]
 	IMAGE_SECTION_HEADER	d_sec;
 	memset(&d_sec, NULL, sizeof IMAGE_SECTION_HEADER);
@@ -189,10 +195,10 @@ int main(int argc, char* argv[])
 	d_sec.Characteristics = IMAGE_SCN_CNT_INITIALIZED_DATA |
 		IMAGE_SCN_MEM_READ |
 		IMAGE_SCN_MEM_WRITE;
+#pragma endregion	
 	
-	
-	
-	
+#pragma region Dosheader
+
 	IMAGE_DOS_HEADER	dos_h;
 	memset(&dos_h, NULL, sizeof IMAGE_DOS_HEADER);
 	dos_h.e_magic = IMAGE_DOS_SIGNATURE;
@@ -212,6 +218,10 @@ int main(int argc, char* argv[])
 	dos_h.e_oemid = 0x0000;
 	dos_h.e_oeminfo = 0x0000;
 	dos_h.e_lfanew = 0x0040;
+
+#pragma endregion
+
+#pragma region NT_header
 
 	IMAGE_NT_HEADERS	nt_h;
 	memset(&nt_h, NULL, sizeof IMAGE_NT_HEADERS);
@@ -253,6 +263,7 @@ int main(int argc, char* argv[])
 	nt_h.OptionalHeader.LoaderFlags = 0x00000000;
 	nt_h.OptionalHeader.NumberOfRvaAndSizes = 0x00000010;
 
+#pragma endregion
 
 	// Create/Open PE File
 	printf("[Information] Writing Generated PE to Disk...\n");
