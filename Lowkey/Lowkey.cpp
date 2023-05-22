@@ -23,6 +23,20 @@ const unsigned char iv[16] = {
 	0x03, 0x7E, 0x7E, 0xBD
 };
 
+// New AES key
+const unsigned char newKey[32] = {
+	0x74, 0x1D, 0xF9, 0xC0, 0x35, 0x79, 0x5E, 0xB3, 0x91, 0x8A, 0x42, 0x6D,
+	0x2C, 0x9F, 0x14, 0xB8, 0xA6, 0x7E, 0x3F, 0x59, 0xD1, 0x0B, 0x86, 0xE2,
+	0xF7, 0x44, 0x23, 0xAB, 0x6E, 0xC5, 0x37, 0x8D
+};
+
+// New AES IV
+const unsigned char newIv[16] = {
+	0x17, 0x46, 0x3A, 0x9E, 0xB1, 0x58, 0x22, 0x7C, 0xD5, 0x8F, 0x41, 0x0A,
+	0x73, 0x2D, 0x88, 0xE3
+};
+
+
 using namespace std;
 
 // Macros
@@ -55,6 +69,28 @@ inline DWORD _align(DWORD size, DWORD align, DWORD addr = 0)
 	if (!(size % align)) return addr + size;
 	return addr + (size / align + 1) * align;
 }
+
+vector<DWORD> findKeyChunks(const unsigned char* data, size_t data_size, const unsigned char* key, size_t key_size, size_t chunk_size = 4) {
+	// Check if the key size is a multiple of the chunk size
+	if (key_size % chunk_size != 0) return vector<DWORD>(1, -1);
+
+	size_t numChunks = key_size / chunk_size;
+
+	vector<DWORD> indices(numChunks, -1);
+
+	// Search the data for each chunk
+	for (size_t j = 0; j < numChunks; j++) {
+		for (size_t i = 0; i <= data_size - chunk_size; i++) {
+			if (memcmp(&data[i], &key[j * chunk_size], chunk_size) == 0) {
+				indices[j] = i;
+				break;
+			}
+		}
+	}
+
+	return indices;
+}
+
 
 // App Entrypoint
 int main(int argc, char* argv[])
@@ -115,8 +151,31 @@ int main(int argc, char* argv[])
 
 	// <----- Packing Data ( Main Implementation ) ----->
 	printf("[Information] Initializing AES Cryptor...\n");
+	vector<DWORD> keyIndices = findKeyChunks(lowkey_stub, sizeof(lowkey_stub), key, sizeof(key), 4);
+	vector<DWORD> ivIndices = findKeyChunks(lowkey_stub, sizeof(lowkey_stub), iv, sizeof(iv), 4);
+
 	struct AES_ctx ctx;
-	AES_init_ctx_iv(&ctx, key, iv);
+
+	// For the key indices
+	if (find(keyIndices.begin(), keyIndices.end(), -1) != keyIndices.end() ||
+		find(ivIndices.begin(), ivIndices.end(), -1) != ivIndices.end()) {
+		printf("[Information Default key used\n");
+		AES_init_ctx_iv(&ctx, key, iv);
+	}
+	else
+	{
+		printf("[Information] New Key and IV used\n");
+		AES_init_ctx_iv(&ctx, newKey, newIv);
+		// Replace the key chunks
+		for (size_t i = 0; i < keyIndices.size(); i++) {
+			memcpy(&lowkey_stub[keyIndices[i]], &newKey[i * 4], 4);
+		}
+		// Replace the iv chunks
+		for (size_t i = 0; i < ivIndices.size(); i++) {
+			memcpy(&lowkey_stub[ivIndices[i]], &newIv[i * 4], 4);
+		}
+	}
+	
 
 	printf("[Information] Initializing Compressor...\n");
 	FL2_CCtx* cctx = FL2_createCCtxMt(8);
@@ -283,6 +342,7 @@ int main(int argc, char* argv[])
 	// Add Padding
 	while (pe_writter.tellp() != c_sec.PointerToRawData) pe_writter.put(0x0);
 
+	
 	Signature Sig(lowkey_stub, sizeof lowkey_stub);
 	vector<DWORD> offsets = Sig.getAlloffs();
 	DWORD data_ptr_offset = offsets[0];
