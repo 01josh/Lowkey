@@ -90,6 +90,17 @@ vector<DWORD> findKeyChunks(const unsigned char* data, size_t data_size, const u
 
 	return indices;
 }
+// Check if a string is a valid hex string
+bool isValidHexString(const char* str, size_t expectedLength) {
+	size_t len = strlen(str);
+	if (len != expectedLength) return false;
+
+	for (size_t i = 0; i < len; i++) {
+		if (!isxdigit(str[i])) return false;
+	}
+
+	return true;
+}
 
 
 // App Entrypoint
@@ -101,12 +112,58 @@ int main(int argc, char* argv[])
 	FlushConsoleInputBuffer(hConsole);
 	CONSOLE_COLOR_DEFAULT;
 
-	// Validate Arguments Count
-	if (argc != 3) return EXIT_FAILURE;
+	if (argc < 3) {
+		printf("Usage: program input_pe_file output_pe_file [newKey newIv]\n");
+		return EXIT_FAILURE;
+	}
 
 	// User Inputs
 	char* input_pe_file = argv[1];
 	char* output_pe_file = argv[2];
+
+	// Scenario 1: Standard usage, no new encryption key or IV provided
+	if (argc == 3) {
+		// Implement your standard usage scenario here
+	}
+
+	// Scenario 2: New encryption key is provided
+	else if (argc == 4) {
+		char* newKey = argv[3];
+		// Key is 32 bytes => 64 hexadecimal characters
+		if (!isValidHexString(newKey, 64)) {
+			printf("Invalid encryption key. It must be a 64-character hex string.\n");
+			return EXIT_FAILURE;
+		}
+		else
+		{
+			printf("[Validation] Encryption key accepted.\n");
+		}
+
+		// Implement the scenario where a new encryption key is used here
+	}
+
+	// Scenario 3: New encryption key and IV are provided
+	else if (argc == 5) {
+		char* newKey = argv[3];
+		char* newIv = argv[4];
+		// Key is 32 bytes => 64 hexadecimal characters
+		// IV is 16 bytes => 32 hexadecimal characters
+		if (!isValidHexString(newKey, 64) || !isValidHexString(newIv, 32)) {
+			printf("Invalid encryption key or IV. The key must be a 64-character hex string, and the IV a 32-character hex string.\n");
+			return EXIT_FAILURE;
+		}
+		else
+		{
+			printf("[Validation] Encryption key accepted and IV accepted.\n");
+		}
+
+		// Implement the scenario where the encryption key and IV are changed here
+	}
+
+	else {
+		printf("Invalid number of arguments\n");
+		return EXIT_FAILURE;
+	}
 
 	// Reading Input PE File
 	ifstream input_pe_file_reader(argv[1], ios::binary);
