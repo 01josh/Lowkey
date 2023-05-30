@@ -1,13 +1,13 @@
 
 
-// standard libraries
+//standard libraries
 #include <Windows.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <algorithm>
 
-// classes
+//Klassen
 #include "signature.h"
 
 //AES key
@@ -17,20 +17,20 @@ const unsigned char key[32] = {
 	0xB2, 0x5F, 0xDB, 0xEA, 0x0D, 0xB6, 0x8E, 0xA2
 };
 
-//AES IV this 
+//AES IV 
 const unsigned char iv[16] = {
 	0x18, 0x42, 0x31, 0x2D, 0xFC, 0xEF, 0xDA, 0xB6, 0xB9, 0x49, 0xF1, 0x0D,
 	0x03, 0x7E, 0x7E, 0xBD
 };
 
-// New AES key
+//New AES key
 const unsigned char newKey[32] = {
 	0x74, 0x1D, 0xF9, 0xC0, 0x35, 0x79, 0x5E, 0xB3, 0x91, 0x8A, 0x42, 0x6D,
 	0x2C, 0x9F, 0x14, 0xB8, 0xA6, 0x7E, 0x3F, 0x59, 0xD1, 0x0B, 0x86, 0xE2,
 	0xF7, 0x44, 0x23, 0xAB, 0x6E, 0xC5, 0x37, 0x8D
 };
 
-// New AES IV
+//New AES IV
 const unsigned char newIv[16] = {
 	0x17, 0x46, 0x3A, 0x9E, 0xB1, 0x58, 0x22, 0x7C, 0xD5, 0x8F, 0x41, 0x0A,
 	0x73, 0x2D, 0x88, 0xE3
@@ -46,39 +46,36 @@ using namespace std;
 #define CONSOLE_COLOR_SUCCSESS	SetConsoleTextAttribute(hConsole, 0x0A);
 #define CONSOLE_COLOR_WHITE 	SetConsoleTextAttribute(hConsole, 0x07);
 
-// Encryption Library
+//Encryptie library
 extern "C"
 {
 #include "aes.h"
 }
 
-// Compression Library
+//Compressie Library
 #include "lzma2/fast-lzma2.h"
 #pragma comment(lib, "lzma2\\fast-lzma2.lib")
 
-// Lowkey Stub
+//Lowkey Stub
 #include "Lowkey_stub.h"
 
-// Configs
+//Configs alignment
 #define file_alignment_size			512
 #define memory_alignment_size		4096
 
-// Helpers
+//Helpers
 inline DWORD _align(DWORD size, DWORD align, DWORD addr = 0)
 {
 	if (!(size % align)) return addr + size;
 	return addr + (size / align + 1) * align;
 }
-
 vector<DWORD> findKeyChunks(const unsigned char* data, size_t data_size, const unsigned char* key, size_t key_size, size_t chunk_size = 4) {
-	// Check if the key size is a multiple of the chunk size
 	if (key_size % chunk_size != 0) return vector<DWORD>(1, -1);
 
 	size_t numChunks = key_size / chunk_size;
 
 	vector<DWORD> indices(numChunks, -1);
 
-	// Search the data for each chunk
 	for (size_t j = 0; j < numChunks; j++) {
 		for (size_t i = 0; i <= data_size - chunk_size; i++) {
 			if (memcmp(&data[i], &key[j * chunk_size], chunk_size) == 0) {
@@ -90,7 +87,6 @@ vector<DWORD> findKeyChunks(const unsigned char* data, size_t data_size, const u
 
 	return indices;
 }
-// Check if a string is a valid hex string
 bool isValidHexString(const char* str, size_t expectedLength) {
 	size_t len = strlen(str);
 	if (len != expectedLength) return false;
@@ -103,10 +99,9 @@ bool isValidHexString(const char* str, size_t expectedLength) {
 }
 
 
-// App Entrypoint
 int main(int argc, char* argv[])
 {
-	// Setup Console 
+	//Setup Console 
 	HANDLE  hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTitleA("Lowkey Custom x64 PE Packer");
 	FlushConsoleInputBuffer(hConsole);
@@ -117,19 +112,15 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	// User Inputs
+	//User Inputs
 	char* input_pe_file = argv[1];
 	char* output_pe_file = argv[2];
 
-	// Scenario 1: Standard usage, no new encryption key or IV provided
 	if (argc == 3) {
-		// Implement your standard usage scenario here
-	}
 
-	// Scenario 2: New encryption key is provided
+	}
 	else if (argc == 4) {
 		char* newKey = argv[3];
-		// Key is 32 bytes => 64 hexadecimal characters
 		if (!isValidHexString(newKey, 64)) {
 			printf("Invalid encryption key. It must be a 64-character hex string.\n");
 			return EXIT_FAILURE;
@@ -138,16 +129,11 @@ int main(int argc, char* argv[])
 		{
 			printf("[Validation] Encryption key accepted.\n");
 		}
-
-		// Implement the scenario where a new encryption key is used here
 	}
 
-	// Scenario 3: New encryption key and IV are provided
 	else if (argc == 5) {
 		char* newKey = argv[3];
 		char* newIv = argv[4];
-		// Key is 32 bytes => 64 hexadecimal characters
-		// IV is 16 bytes => 32 hexadecimal characters
 		if (!isValidHexString(newKey, 64) || !isValidHexString(newIv, 32)) {
 			printf("Invalid encryption key or IV. The key must be a 64-character hex string, and the IV a 32-character hex string.\n");
 			return EXIT_FAILURE;
@@ -157,7 +143,6 @@ int main(int argc, char* argv[])
 			printf("[Validation] Encryption key accepted and IV accepted.\n");
 		}
 
-		// Implement the scenario where the encryption key and IV are changed here
 	}
 
 	else {
@@ -165,28 +150,28 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	// Reading Input PE File
+	//Reading Input PE File
 	ifstream input_pe_file_reader(argv[1], ios::binary);
 	vector<uint8_t> input_pe_file_buffer(istreambuf_iterator<char>(input_pe_file_reader), {});
 
-	// Parsing Input PE File
+	//Parsing Input PE File
 	PIMAGE_DOS_HEADER in_pe_dos_header = (PIMAGE_DOS_HEADER)input_pe_file_buffer.data();
 	PIMAGE_NT_HEADERS in_pe_nt_header = (PIMAGE_NT_HEADERS)(input_pe_file_buffer.data() + in_pe_dos_header->e_lfanew);
 
-	// Validte PE Infromation
+	//Valideren PE Infromation
 	bool isPE = in_pe_dos_header->e_magic == IMAGE_DOS_SIGNATURE;
 	bool is64 = in_pe_nt_header->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64 &&
 		in_pe_nt_header->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC;
 	bool isDLL = in_pe_nt_header->FileHeader.Characteristics & IMAGE_FILE_DLL;
 	bool isNET = in_pe_nt_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size != 0;
 
-	// Log Validation Data
+	//Log Validation Data
 	printf("[Validation] Is PE File : %s\n", BOOL_STR(isPE));
 	printf("[Validation] Is 64bit : %s\n", BOOL_STR(is64));
 	printf("[Validation] Is DLL : %s\n", BOOL_STR(isDLL));
 	printf("[Validation] Is COM or .Net : %s\n", BOOL_STR(isNET));
 
-	// Validate and Apply Action
+	
 	if (!isPE)
 	{
 		CONSOLE_COLOR_ERROR;
@@ -206,14 +191,13 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	// <----- Packing Data ( Main Implementation ) ----->
+	//AES encryptie initialisatie
 	printf("[Information] Initializing AES Cryptor...\n");
 	vector<DWORD> keyIndices = findKeyChunks(lowkey_stub, sizeof(lowkey_stub), key, sizeof(key), 4);
 	vector<DWORD> ivIndices = findKeyChunks(lowkey_stub, sizeof(lowkey_stub), iv, sizeof(iv), 4);
 
 	struct AES_ctx ctx;
 
-	// For the key indices
 	if (find(keyIndices.begin(), keyIndices.end(), -1) != keyIndices.end() ||
 		find(ivIndices.begin(), ivIndices.end(), -1) != ivIndices.end()) {
 		printf("[Information Default key used\n");
@@ -223,11 +207,9 @@ int main(int argc, char* argv[])
 	{
 		printf("[Information] New Key and IV used\n");
 		AES_init_ctx_iv(&ctx, newKey, newIv);
-		// Replace the key chunks
 		for (size_t i = 0; i < keyIndices.size(); i++) {
 			memcpy(&lowkey_stub[keyIndices[i]], &newKey[i * 4], 4);
 		}
-		// Replace the iv chunks
 		for (size_t i = 0; i < ivIndices.size(); i++) {
 			memcpy(&lowkey_stub[ivIndices[i]], &newIv[i * 4], 4);
 		}
@@ -239,41 +221,44 @@ int main(int argc, char* argv[])
 	FL2_CCtx_setParameter(cctx, FL2_p_compressionLevel, 9);
 	FL2_CCtx_setParameter(cctx, FL2_p_dictionarySize, 1024);
 
+	//Aanmaken data buffer op basis van grootte input bestand
 	vector<uint8_t> data_buffer;
 	data_buffer.resize(input_pe_file_buffer.size());
 
 	printf("[Information] Compressing Buffer...\n");
+	//De originele grootte wordt opgeslagen voor bewerking
 	size_t original_size = input_pe_file_buffer.size();
+	//De compressie van het ingevoerde bestand return waarde is de gecomprimeerde grootte die later weer gebruikt wordt om de buffer te resizen.
 	size_t compressed_size = FL2_compressCCtx(cctx, data_buffer.data(), data_buffer.size(),
 		input_pe_file_buffer.data(), original_size, 9);
 	data_buffer.resize(compressed_size);
 
-	// Add Padding Before Encryption 
+	//Padding voor encryptie 
 	for (size_t i = 0; i < 16; i++) data_buffer.insert(data_buffer.begin(), 0x0);
 	for (size_t i = 0; i < 16; i++) data_buffer.push_back(0x0);
 
 	printf("[Information] Encrypting Buffer...\n");
 	AES_CBC_encrypt_buffer(&ctx, data_buffer.data(), data_buffer.size());
 
-	// Log Compression Information
+	//Log Compression Information
 	printf("[Information] Original PE Size :  %ld bytes\n", input_pe_file_buffer.size());
 	printf("[Information] Packed PE Size   :  %ld bytes\n", data_buffer.size());
 
-	// Calculate Compression Ratio
+	//Calculate Compression Ratio
 	float ratio =
 		(1.0f - ((float)data_buffer.size() / (float)input_pe_file_buffer.size())) * 100.f;
 	printf("[Information] Compression Ratio : %.2f%%\n", (roundf(ratio * 100.0f) * 0.01f));
 
-	// Generating PE File, Initializing DOS + NT Headeres
+	//Maken PE bestand met headers
 
 #pragma region | PE Generation |
 
 	printf("[Information] Generating PE...\n");
 #pragma region Stub
 
-	// Initializing Section [ Code ]
+	//Initializing Section Stub
 	IMAGE_SECTION_HEADER	c_sec;
-	memset(&c_sec, NULL, sizeof IMAGE_SECTION_HEADER); //Set values to zero in order to manually edit them later.
+	memset(&c_sec, NULL, sizeof IMAGE_SECTION_HEADER);
 	c_sec.Name[0] = '[';
 	c_sec.Name[1] = 'S';
 	c_sec.Name[2] = 'T';
@@ -293,7 +278,7 @@ int main(int argc, char* argv[])
 #pragma endregion
 
 #pragma region Program
-	// Initializing Section [ Data ]
+	// Initializing Section PROGR
 	IMAGE_SECTION_HEADER	d_sec;
 	memset(&d_sec, NULL, sizeof IMAGE_SECTION_HEADER);
 	d_sec.Name[0] = '[';
@@ -355,7 +340,7 @@ int main(int argc, char* argv[])
 	nt_h.OptionalHeader.SizeOfCode = c_sec.SizeOfRawData;
 	nt_h.OptionalHeader.SizeOfInitializedData = d_sec.SizeOfRawData;
 	nt_h.OptionalHeader.SizeOfUninitializedData = 0x0;
-	nt_h.OptionalHeader.AddressOfEntryPoint = 0x00005F00;    //needs to updated if stub gets changed
+	nt_h.OptionalHeader.AddressOfEntryPoint = 0x00005F00;    //moet worden geupdate bij wijziging stub
 	nt_h.OptionalHeader.BaseOfCode = 0x00001000;
 	nt_h.OptionalHeader.ImageBase = 0x0000000140000000;
 	nt_h.OptionalHeader.SectionAlignment = memory_alignment_size;
@@ -381,25 +366,25 @@ int main(int argc, char* argv[])
 
 #pragma endregion
 
-	// Create/Open PE File
+	//Output bestand aanmaken
 	printf("[Information] Writing Generated PE to Disk...\n");
 	fstream pe_writter;
 	pe_writter.open(output_pe_file, ios::binary | ios::out);
 
-	// Write DOS Header
+	//DOS Header
 	pe_writter.write((char*)&dos_h, sizeof dos_h);
 
-	// Write NT Header
+	//NT Header
 	pe_writter.write((char*)&nt_h, sizeof nt_h);
 
-	// Write Headers of Sections
+	//Sectie Headers
 	pe_writter.write((char*)&c_sec, sizeof c_sec);
 	pe_writter.write((char*)&d_sec, sizeof d_sec);
 
-	// Add Padding
+	//Add Padding
 	while (pe_writter.tellp() != c_sec.PointerToRawData) pe_writter.put(0x0);
 
-	
+	//Zoeken van signaturen
 	Signature Sig(lowkey_stub, sizeof lowkey_stub);
 	vector<DWORD> offsets = Sig.getAlloffs();
 	DWORD data_ptr_offset = offsets[0];
@@ -407,7 +392,7 @@ int main(int argc, char* argv[])
 	DWORD actual_data_size_offset = offsets[2];
 	DWORD header_size_offset = offsets[3];
 
-	// Log Singuatures Information
+	//Log Singuatures Information
 	if (data_ptr_offset != -1)
 		printf("[Information] Signature A Found at :  %X\n", data_ptr_offset);
 	if (data_size_offset != -1)
@@ -417,7 +402,7 @@ int main(int argc, char* argv[])
 	if (header_size_offset != -1)
 		printf("[Information] Signature D Found at :  %X\n", header_size_offset);
 
-	// Update Code Section
+	//Variabelen overschrijven in de stub
 	printf("[Information] Updating Offset Data...\n");
 	memcpy(&lowkey_stub[data_ptr_offset], &d_sec.VirtualAddress, sizeof DWORD);
 	memcpy(&lowkey_stub[data_size_offset], &d_sec.SizeOfRawData, sizeof DWORD);
@@ -425,22 +410,23 @@ int main(int argc, char* argv[])
 	memcpy(&lowkey_stub[actual_data_size_offset], &pe_file_actual_size, sizeof DWORD);
 	memcpy(&lowkey_stub[header_size_offset], &nt_h.OptionalHeader.BaseOfCode, sizeof DWORD);
 
-	// Write Code Section
+	//stub wordt toegevoegd aan output bestand
 	printf("[Information] Writing Code Data...\n");
 	pe_writter.write((char*)&lowkey_stub, sizeof lowkey_stub);
 
-	// Write Data Section
+	//ingepakte programma wordt naar het output bestand geschreven
 	printf("[Information] Writing Packed Data...\n");
 	size_t current_pos = pe_writter.tellp();
 	pe_writter.write((char*)data_buffer.data(), data_buffer.size());
+	//Mocht er nog een stuk leeg zijn wordt dit gevuld met nul waarden tot het einde van de grootte van het ingepakt bestand.
 	while (pe_writter.tellp() != current_pos + d_sec.SizeOfRawData) pe_writter.put(0x0);
 
-	// Close PE File
+	//Close PE File
 	pe_writter.close();
 
 #pragma endregion
 
-	// Releasing And Finalizing
+	//Releasing And Finalizing
 	vector<uint8_t>().swap(input_pe_file_buffer);
 	vector<uint8_t>().swap(data_buffer);
 	CONSOLE_COLOR_SUCCSESS;
