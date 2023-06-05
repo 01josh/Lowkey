@@ -112,15 +112,27 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
+
+
 	//User Inputs
+	//array<char*, sizeof(argv)> constray;
+
+
 	char* input_pe_file = argv[1];
 	char* output_pe_file = argv[2];
+	const unsigned char* newKey2 = reinterpret_cast<const unsigned char*>(argv[3]);
+	const unsigned char* newIv2 = reinterpret_cast<const unsigned char*>(argv[4]);
+
+	//sorry
+	bool ivbool = false;
+	bool keybool = false;
+
 
 	if (argc == 3) {
 
 	}
 	else if (argc == 4) {
-		char* newKey = argv[3];
+		const char* newKey = argv[3];
 		if (!isValidHexString(newKey, 64)) {
 			printf("Invalid encryption key. It must be a 64-character hex string.\n");
 			return EXIT_FAILURE;
@@ -128,12 +140,13 @@ int main(int argc, char* argv[])
 		else
 		{
 			printf("[Validation] Encryption key accepted.\n");
+			keybool = true;
 		}
 	}
 
 	else if (argc == 5) {
-		char* newKey = argv[3];
-		char* newIv = argv[4];
+		const char* newKey = argv[3];
+		const char* newIv = argv[4];
 		if (!isValidHexString(newKey, 64) || !isValidHexString(newIv, 32)) {
 			printf("Invalid encryption key or IV. The key must be a 64-character hex string, and the IV a 32-character hex string.\n");
 			return EXIT_FAILURE;
@@ -141,6 +154,9 @@ int main(int argc, char* argv[])
 		else
 		{
 			printf("[Validation] Encryption key accepted and IV accepted.\n");
+			ivbool = true;
+			keybool = true;
+
 		}
 
 	}
@@ -206,7 +222,19 @@ int main(int argc, char* argv[])
 	else
 	{
 		printf("[Information] New Key and IV used\n");
-		AES_init_ctx_iv(&ctx, newKey, newIv);
+		
+		if (keybool && ivbool) {
+			AES_init_ctx_iv(&ctx, newKey2, newIv2);
+			printf("[Information] New Key and IV used2\n");
+		}
+		if (keybool && !ivbool) {
+			AES_init_ctx_iv(&ctx, newKey2, newIv);
+		}
+		if (!keybool && !ivbool) {
+			AES_init_ctx_iv(&ctx, newKey, newIv);
+		}
+		
+
 		for (size_t i = 0; i < keyIndices.size(); i++) {
 			memcpy(&lowkey_stub[keyIndices[i]], &newKey[i * 4], 4);
 		}
