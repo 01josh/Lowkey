@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+//#include <cstring>
 
 //Klassen
 #include "signature.h"
@@ -87,16 +88,7 @@ vector<DWORD> findKeyChunks(const unsigned char* data, size_t data_size, const u
 
 	return indices;
 }
-bool isValidHexString(const char* str, size_t expectedLength) {
-	size_t len = strlen(str);
-	if (len != expectedLength) return false;
 
-	for (size_t i = 0; i < len; i++) {
-		if (!isxdigit(str[i])) return false;
-	}
-
-	return true;
-}
 
 
 int main(int argc, char* argv[])
@@ -120,47 +112,31 @@ int main(int argc, char* argv[])
 
 	char* input_pe_file = argv[1];
 	char* output_pe_file = argv[2];
-	const unsigned char* newKey2 = reinterpret_cast<const unsigned char*>(argv[3]);
-	const unsigned char* newIv2 = reinterpret_cast<const unsigned char*>(argv[4]);
 
-	//sorry
-	bool ivbool = false;
-	bool keybool = false;
+	//init aes
+	struct AES_ctx ctx;
+
+	bool inputkey = false;
+	bool keyfound = false;
 
 
 	if (argc == 3) {
 
 	}
 	else if (argc == 4) {
-		const char* newKey = argv[3];
-		if (!isValidHexString(newKey, 64)) {
-			printf("Invalid encryption key. It must be a 64-character hex string.\n");
-			return EXIT_FAILURE;
+		char* aeskey = argv[3];
+		char expect [] = { 'n', 'e', 'w', 'k', 'e', 'y' };
+
+
+		if (strcmp(aeskey,expect)== 0) {
+			inputkey = true;
+			printf("[Validation] New Encryption key used.\n");
 		}
 		else
 		{
-			printf("[Validation] Encryption key accepted.\n");
-			keybool = true;
+			
 		}
 	}
-
-	else if (argc == 5) {
-		const char* newKey = argv[3];
-		const char* newIv = argv[4];
-		if (!isValidHexString(newKey, 64) || !isValidHexString(newIv, 32)) {
-			printf("Invalid encryption key or IV. The key must be a 64-character hex string, and the IV a 32-character hex string.\n");
-			return EXIT_FAILURE;
-		}
-		else
-		{
-			printf("[Validation] Encryption key accepted and IV accepted.\n");
-			ivbool = true;
-			keybool = true;
-
-		}
-
-	}
-
 	else {
 		printf("Invalid number of arguments\n");
 		return EXIT_FAILURE;
@@ -212,28 +188,19 @@ int main(int argc, char* argv[])
 	vector<DWORD> keyIndices = findKeyChunks(lowkey_stub, sizeof(lowkey_stub), key, sizeof(key), 4);
 	vector<DWORD> ivIndices = findKeyChunks(lowkey_stub, sizeof(lowkey_stub), iv, sizeof(iv), 4);
 
-	struct AES_ctx ctx;
+	
 
 	if (find(keyIndices.begin(), keyIndices.end(), -1) != keyIndices.end() ||
-		find(ivIndices.begin(), ivIndices.end(), -1) != ivIndices.end()) {
-		printf("[Information Default key used\n");
+		find(ivIndices.begin(), ivIndices.end(), -1) != ivIndices.end() || !inputkey)  {
+		printf("[Information] Defauolt key used\n");
+
 		AES_init_ctx_iv(&ctx, key, iv);
 	}
 	else
-	{
-		printf("[Information] New Key and IV used\n");
-		
-		if (keybool && ivbool) {
-			AES_init_ctx_iv(&ctx, newKey2, newIv2);
-			printf("[Information] New Key and IV used2\n");
-		}
-		if (keybool && !ivbool) {
-			AES_init_ctx_iv(&ctx, newKey2, newIv);
-		}
-		if (!keybool && !ivbool) {
-			AES_init_ctx_iv(&ctx, newKey, newIv);
-		}
-		
+		{
+		printf("[Information] new Key used\n");
+		AES_init_ctx_iv(&ctx, newKey, newIv);
+				
 
 		for (size_t i = 0; i < keyIndices.size(); i++) {
 			memcpy(&lowkey_stub[keyIndices[i]], &newKey[i * 4], 4);
